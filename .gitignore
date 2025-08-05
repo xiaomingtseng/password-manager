@@ -22,3 +22,29 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# 密碼管理器敏感資料 - 絕對不要提交
+data/
+*.db
+*.sqlite
+*.sqlite3
+
+# 特定敏感檔案
+master.json
+passwords.json
+
+# 環境配置
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+
+# 用戶數據目錄
+userdata/
+AppData/
+userData/
+
+# 備份檔案
+*.backup
+*.bak
