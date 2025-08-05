@@ -18,12 +18,22 @@
 - **打包工具**: Vite
 - **桌面應用**: Electron
 - **狀態管理**: Zustand
-- **樣式**: Tailwind CSS
+- **樣式**: Tailwind CSS v4 ✨
 - **圖標**: Heroicons
 - **加密**: 簡單 Base64 編碼（開發版本）
 - **數據存儲**: JSON 文件 (Electron) / localStorage (瀏覽器)
 
 > **注意**: 原計劃使用 SQLite 數據庫，但因為 `better-sqlite3` 在 Electron 環境中的編譯複雜性，目前版本採用 JSON 文件存儲。未來版本將會實現完整的 SQLite 支援。
+
+### 🎨 Tailwind CSS v4 配置
+
+本專案採用最新的 Tailwind CSS v4，具有以下特點：
+- **零配置**: 無需 `tailwind.config.js`
+- **新語法**: 使用 `@import "tailwindcss"` 替代傳統的 `@tailwind` 指令
+- **內建 PostCSS**: 不需要額外的 PostCSS 配置
+- **更快速**: 編譯速度和性能優化
+
+> **重要**: Tailwind CSS v4 與 v3 不完全兼容，配置方式有重大變更。詳見 [Tailwind CSS v4 文檔](https://tailwindcss.com/docs)
 
 ## 開發環境設置
 
@@ -124,6 +134,31 @@ PasswordGenerator/
 - 修改 Electron 代碼需要重新啟動應用程式
 - 數據文件會在第一次運行時自動創建
 
+### 🎨 Tailwind CSS v4 開發須知
+
+**配置文件**: 
+- ❌ 不需要 `tailwind.config.js`
+- ❌ 不需要 `postcss.config.js` 
+- ✅ 只需在 `src/index.css` 中使用 `@import "tailwindcss"`
+
+**安裝套件**:
+```bash
+npm install @tailwindcss/postcss autoprefixer
+```
+
+**CSS 語法變更**:
+```css
+/* ❌ Tailwind v3 語法 */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ✅ Tailwind v4 語法 */
+@import "tailwindcss";
+```
+
+**Vite 配置**: 無需特殊配置，Vite 會自動處理 Tailwind v4。
+
 ### 開發版本限制
 
 - 密碼加密使用簡單的 Base64 編碼（非安全）
@@ -158,6 +193,11 @@ npm run electron:pack
 1. **應用程式無法啟動**: 確認 Node.js 版本 >= 16
 2. **依賴安裝失敗**: 嘗試刪除 `node_modules` 和重新安裝
 3. **Electron 窗口空白**: 檢查開發服務器是否正在運行 (http://localhost:5173)
+4. **Tailwind CSS 樣式未生效**: 
+   - 確認使用 Tailwind CSS v4 語法 (`@import "tailwindcss"`)
+   - 檢查 `src/index.css` 是否正確導入
+   - 確認沒有多餘的 `tailwind.config.js` 或 `postcss.config.js` 文件
+   - 重新啟動開發服務器
 
 ### 開發模式調試
 
