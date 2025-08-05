@@ -4,6 +4,8 @@ import { PlusIcon, EyeIcon, EyeSlashIcon, PencilIcon, TrashIcon } from '@heroico
 import { useAuthStore } from '../stores/authStore'
 import type { Password } from '../types/electron'
 import { browserPasswordAPI } from '../utils/browserStorage'
+import { PasswordGenerator, DEFAULT_PASSWORD_OPTIONS, PASSWORD_PRESETS } from '../utils/passwordGenerator'
+import type { PasswordOptions } from '../utils/passwordGenerator'
 
 export function PasswordManager() {
   const [passwords, setPasswords] = useState<Password[]>([])
@@ -19,6 +21,11 @@ export function PasswordManager() {
     url: '',
     notes: ''
   })
+
+  // 密碼生成選項
+  const [passwordOptions, setPasswordOptions] = useState<PasswordOptions>(DEFAULT_PASSWORD_OPTIONS)
+
+  const [showPasswordGenerator, setShowPasswordGenerator] = useState(false)
 
   useEffect(() => {
     loadPasswords()
@@ -106,12 +113,12 @@ export function PasswordManager() {
   }
 
   const generatePassword = () => {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*'
-    let result = ''
-    for (let i = 0; i < 16; i++) {
-      result += chars.charAt(Math.floor(Math.random() * chars.length))
-    }
-    setFormData({ ...formData, password: result })
+    const password = PasswordGenerator.generate(passwordOptions)
+    setFormData({ ...formData, password })
+  }
+
+  const applyPreset = (preset: PasswordOptions) => {
+    setPasswordOptions(preset)
   }
 
   return (
@@ -243,12 +250,217 @@ export function PasswordManager() {
                   />
                   <button
                     type="button"
+                    onClick={() => setShowPasswordGenerator(!showPasswordGenerator)}
+                    className="mt-1 px-3 py-2 border border-l-0 border-r-0 border-gray-300 bg-gray-50 hover:bg-gray-100 text-sm"
+                    title="密碼生成選項"
+                  >
+                    ⚙️
+                  </button>
+                  <button
+                    type="button"
                     onClick={generatePassword}
                     className="mt-1 px-4 py-2 border border-l-0 border-gray-300 rounded-r-md bg-gray-50 hover:bg-gray-100 text-sm"
                   >
                     生成
                   </button>
                 </div>
+                
+                {/* 密碼生成器選項 */}
+                {showPasswordGenerator && (
+                  <div className="mt-3 p-4 border border-gray-200 rounded-md bg-gray-50">
+                    <h4 className="text-sm font-medium text-gray-700 mb-3">密碼生成選項</h4>
+                    
+                    {/* 快速預設 */}
+                    <div className="mb-4">
+                      <label className="block text-xs font-medium text-gray-600 mb-2">快速預設</label>
+                      <div className="grid grid-cols-2 gap-2">
+                        <button
+                          type="button"
+                          onClick={() => applyPreset(PASSWORD_PRESETS.simple)}
+                          className="px-3 py-1 text-xs border border-gray-300 rounded hover:bg-gray-100"
+                        >
+                          簡單 (8位)
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => applyPreset(PASSWORD_PRESETS.standard)}
+                          className="px-3 py-1 text-xs border border-gray-300 rounded hover:bg-gray-100"
+                        >
+                          標準 (12位)
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => applyPreset(PASSWORD_PRESETS.strong)}
+                          className="px-3 py-1 text-xs border border-gray-300 rounded hover:bg-gray-100"
+                        >
+                          強密碼 (20位)
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => applyPreset(PASSWORD_PRESETS.numeric)}
+                          className="px-3 py-1 text-xs border border-gray-300 rounded hover:bg-gray-100"
+                        >
+                          純數字 (6位)
+                        </button>
+                      </div>
+                    </div>
+                    
+                    {/* 密碼長度 */}
+                    <div className="mb-3">
+                      <label className="block text-xs font-medium text-gray-600 mb-1">
+                        長度: {passwordOptions.length}
+                      </label>
+                      <input
+                        type="range"
+                        min="4"
+                        max="64"
+                        value={passwordOptions.length}
+                        onChange={(e) => setPasswordOptions({
+                          ...passwordOptions,
+                          length: parseInt(e.target.value)
+                        })}
+                        className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                      />
+                      <div className="flex justify-between text-xs text-gray-500 mt-1">
+                        <span>4</span>
+                        <span>64</span>
+                      </div>
+                    </div>
+
+                    {/* 字符類型選項 */}
+                    <div className="grid grid-cols-2 gap-2 mb-3">
+                      <label className="flex items-center text-xs">
+                        <input
+                          type="checkbox"
+                          checked={passwordOptions.includeUppercase}
+                          onChange={(e) => setPasswordOptions({
+                            ...passwordOptions,
+                            includeUppercase: e.target.checked
+                          })}
+                          className="mr-2"
+                        />
+                        大寫字母 (A-Z)
+                      </label>
+                      
+                      <label className="flex items-center text-xs">
+                        <input
+                          type="checkbox"
+                          checked={passwordOptions.includeLowercase}
+                          onChange={(e) => setPasswordOptions({
+                            ...passwordOptions,
+                            includeLowercase: e.target.checked
+                          })}
+                          className="mr-2"
+                        />
+                        小寫字母 (a-z)
+                      </label>
+                      
+                      <label className="flex items-center text-xs">
+                        <input
+                          type="checkbox"
+                          checked={passwordOptions.includeNumbers}
+                          onChange={(e) => setPasswordOptions({
+                            ...passwordOptions,
+                            includeNumbers: e.target.checked
+                          })}
+                          className="mr-2"
+                        />
+                        數字 (0-9)
+                      </label>
+                      
+                      <label className="flex items-center text-xs">
+                        <input
+                          type="checkbox"
+                          checked={passwordOptions.includeSymbols}
+                          onChange={(e) => setPasswordOptions({
+                            ...passwordOptions,
+                            includeSymbols: e.target.checked
+                          })}
+                          className="mr-2"
+                        />
+                        符號
+                      </label>
+                    </div>
+
+                    {/* 排除相似字符選項 */}
+                    <div className="mb-3">
+                      <label className="flex items-center text-xs">
+                        <input
+                          type="checkbox"
+                          checked={passwordOptions.excludeSimilar}
+                          onChange={(e) => setPasswordOptions({
+                            ...passwordOptions,
+                            excludeSimilar: e.target.checked
+                          })}
+                          className="mr-2"
+                        />
+                        排除相似字符 (0, O, l, 1, I)
+                      </label>
+                    </div>
+
+                    {/* 自定義符號 */}
+                    {passwordOptions.includeSymbols && (
+                      <div className="mb-3">
+                        <label className="block text-xs font-medium text-gray-600 mb-1">
+                          自定義符號
+                        </label>
+                        <input
+                          type="text"
+                          value={passwordOptions.customSymbols}
+                          onChange={(e) => setPasswordOptions({
+                            ...passwordOptions,
+                            customSymbols: e.target.value
+                          })}
+                          className="w-full text-xs border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                          placeholder="輸入要使用的符號..."
+                        />
+                      </div>
+                    )}
+
+                    {/* 密碼強度指示器 */}
+                    <div className="mb-2">
+                      {(() => {
+                        const strength = PasswordGenerator.calculateStrength(passwordOptions)
+                        const entropy = PasswordGenerator.estimateEntropy(passwordOptions)
+                        
+                        return (
+                          <>
+                            <div className="flex justify-between items-center mb-1">
+                              <span className="text-xs font-medium text-gray-600">密碼強度</span>
+                              <span className={`text-xs font-medium ${
+                                strength.level === 'weak' ? 'text-red-600' :
+                                strength.level === 'medium' ? 'text-yellow-600' :
+                                'text-green-600'
+                              }`}>
+                                {strength.level === 'weak' ? '弱' :
+                                 strength.level === 'medium' ? '中' : '強'}
+                              </span>
+                            </div>
+                            <div className="w-full bg-gray-200 rounded-full h-1.5 mb-2">
+                              <div
+                                className={`h-1.5 rounded-full transition-all duration-300 ${
+                                  strength.level === 'weak' ? 'bg-red-500 w-1/3' :
+                                  strength.level === 'medium' ? 'bg-yellow-500 w-2/3' :
+                                  'bg-green-500 w-full'
+                                }`}
+                              ></div>
+                            </div>
+                            <div className="text-xs text-gray-500 mb-1">
+                              熵值: {entropy.toFixed(1)} bits
+                            </div>
+                            {strength.feedback.length > 0 && (
+                              <div className="text-xs text-gray-600">
+                                {strength.feedback.map((feedback, index) => (
+                                  <div key={index} className="mb-1">• {feedback}</div>
+                                ))}
+                              </div>
+                            )}
+                          </>
+                        )
+                      })()}
+                    </div>
+                  </div>
+                )}
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700">網址</label>
