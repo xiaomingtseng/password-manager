@@ -48,3 +48,40 @@ userData/
 # 備份檔案
 *.backup
 *.bak
+
+# Electron 構建和發布檔案
+release/
+dist-electron/
+out/
+build/
+*.exe
+*.dmg
+*.deb
+*.rpm
+*.AppImage
+*.zip
+*.tar.gz
+
+# Electron 開發檔案
+electron-builder.env
+
+# 系統檔案
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# 臨時檔案
+*.tmp
+*.temp
+.cache/
+
+# 錯誤報告
+crash-reports/
+error-logs/
+
+# 測試覆蓋率
+coverage/
+.nyc_output/
+
+# 性能分析
+*.prof

@@ -16,16 +16,18 @@ export default defineConfig({
           build: {
             rollupOptions: {
               external: ['better-sqlite3', 'sqlite3', 'bcryptjs', 'crypto']
-            }
+            },
+            // 優化建置
+            minify: 'esbuild',
+            target: 'node16'
           }
         }
       },
       {
         entry: 'electron/preload.ts',
-        onstart(options) {
-          // Notify the Renderer-Process to reload the page when the Preload-Scripts build is complete, 
-          // instead of restarting the entire Electron App.
-          options.reload()
+        onstart(_options) {
+          // 減少不必要的重載
+          console.log('Preload script built')
         },
       },
     ]),
@@ -38,6 +40,19 @@ export default defineConfig({
   },
   server: {
     port: 5173,
+  },
+  build: {
+    // 優化建置性能
+    target: 'esnext',
+    minify: 'esbuild',
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom'],
+          utils: ['zustand']
+        }
+      }
+    }
   },
   define: {
     global: 'globalThis',

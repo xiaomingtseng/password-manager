@@ -73,14 +73,25 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   checkMasterPassword: async () => {
-    if (window.electronAPI) {
-      // Electron 環境
-      const hasMaster = await window.electronAPI.checkMasterPassword()
-      set({ hasMasterPassword: hasMaster })
-    } else {
-      // 瀏覽器環境 - 檢查 localStorage
-      const stored = localStorage.getItem('masterPassword')
-      set({ hasMasterPassword: !!stored })
+    try {
+      if (window.electronAPI) {
+        // Electron 環境
+        console.log('檢查主密碼 - Electron 環境')
+        const hasMaster = await window.electronAPI.checkMasterPassword()
+        console.log('主密碼檢查結果:', hasMaster)
+        set({ hasMasterPassword: hasMaster })
+      } else {
+        // 瀏覽器環境 - 檢查 localStorage
+        console.log('檢查主密碼 - 瀏覽器環境')
+        const stored = localStorage.getItem('masterPassword')
+        const hasMaster = !!stored
+        console.log('localStorage 檢查結果:', hasMaster)
+        set({ hasMasterPassword: hasMaster })
+      }
+    } catch (error) {
+      console.error('檢查主密碼時發生錯誤:', error)
+      // 如果發生錯誤，假設沒有主密碼
+      set({ hasMasterPassword: false })
     }
   },
 }))
